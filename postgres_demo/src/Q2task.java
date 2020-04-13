@@ -25,7 +25,7 @@ public class Q2task extends QueryTask{
 			String regionString = RegionNames[random.nextInt(5)];
 			Integer sizeInteger = random.nextInt(50)+1;
 			
-			String queryString = "select /*+ USE_SORT_MERGE_JOIN*/\n" + 
+			String queryString = "select\n" + 
 					"s_acctbal,\n" + 
 					"s_name,\n" + 
 					"n_name,\n" + 
@@ -76,7 +76,7 @@ public class Q2task extends QueryTask{
 			
 			statement.execute(queryString);
 			
-			connection.commit();
+			//connection.commit();
 			
 			this.endInstant = Instant.now();
 			System.out.println("Execution time for Q2 is: "+

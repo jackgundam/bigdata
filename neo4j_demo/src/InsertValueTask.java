@@ -1,6 +1,8 @@
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -12,18 +14,18 @@ public class InsertValueTask {
 	
 	private Connection connection;
 	
-	private int sf;
+	private float sf;
 	
 	private Double[] retailPrices;
 
-	public InsertValueTask(Connection connection, int sf) {
+	public InsertValueTask(Connection connection, float sf) {
 		this.connection = connection;
 		this.sf = sf;
-		this.retailPrices = new Double[sf*200000];
+		this.retailPrices = new Double[(int) (sf*200000)];
 	}
 	
 	private ArrayList<Integer> shuffleKey(Integer fixNum){
-		Integer size = new Integer(sf*fixNum);
+		Integer size = new Integer((int) (sf*fixNum));
 		ArrayList<Integer> keys = new ArrayList<Integer>();
 		for(int it=0 ; it < size; it++) {
 			keys.add(it);
@@ -32,18 +34,14 @@ public class InsertValueTask {
 		return keys;
 	}
 	
-	private Date addDays(Date date, int days) {
-		return new Date(date.getTime()+days*86400000);
-	}
-	
 	public void InsertSupplier() {
 		try {
 			Statement statement = connection.createStatement();
-			Integer size = sf*10000;
+			Integer size = (int) (sf*10000);
 			ArrayList<Integer> keys = shuffleKey(10000);
 			Random random = new Random();
 			ArrayList<Integer> CommentList = new ArrayList<Integer>();
-			Integer commentedsize = 10*sf;
+			Integer commentedsize = (int) (10*sf);
 			Integer index = 0;
 			while (CommentList.size()<commentedsize) {
 				index = random.nextInt(size);
@@ -121,7 +119,7 @@ public class InsertValueTask {
 		
 		try {
 			Statement statement = connection.createStatement();
-			Integer size = sf*200000;
+			Integer size = (int) (sf*200000);
 			Random random = new Random();
 			ArrayList<Integer> keys = shuffleKey(200000);
 			
@@ -189,8 +187,8 @@ public class InsertValueTask {
 	public void InsertPartSupp() {
 		try {
 			Statement statement = connection.createStatement();
-			Integer S = sf*10000;
-			Integer size = sf*200000;
+			Integer S = (int) (sf*10000);
+			Integer size = (int) (sf*200000);
 			Random random = new Random();
 			ArrayList<Integer> psKeys = shuffleKey(200000);
 			for (int idx = 0; idx < size; idx++) {
@@ -231,7 +229,7 @@ public class InsertValueTask {
 		
 		try {
 			Statement statement = connection.createStatement();
-			Integer size = sf*150000;
+			Integer size = (int) (sf*150000);
 			Random random = new Random();
 			ArrayList<Integer> keys = shuffleKey(150000);
 			for (int i = 0; i < size; i++) {
@@ -283,12 +281,16 @@ public class InsertValueTask {
 		String[] priorities = { "1-URGENT", "2-HIGH", "3-MEDIUM", "4-NOT SPECIFIED", "5-LOW" };
 		String[] instructs = { "DELIVER IN PERSON", "COLLECT COD", "NONE", "TAKE BACK RETURN" };
 		String[] modes = { "REG AIR", "AIR", "RAIL", "SHIP", "TRUCK", "MAIL", "FOB" };
-		Date startDate = Date.valueOf("1992-01-01");
-		Date currentDate = Date.valueOf("1995-06-17");
-		Date endDate = Date.valueOf("1998-12-31");
+		
+		LocalDate startDate = LocalDate.parse("1992-01-01");
+		LocalDate currentDate = LocalDate.parse("1995-06-17");
+		LocalDate endDate = LocalDate.parse("1998-12-31");
+		
+		int dayRange = 2405;
+		
 		try {
 			Statement statement = connection.createStatement();
-			Integer orderSize = sf * 1500000 * 4;
+			Integer orderSize = (int) (sf * 1500000 * 4);
 			ArrayList<Integer> orderKeys = shuffleKey(1500000 * 4);
 			Random random = new Random();
 			for (int idx = 0; idx < orderSize; idx++) {
@@ -298,20 +300,17 @@ public class InsertValueTask {
 				}
 				Integer custKey = 0;
 				do {
-					custKey = random.nextInt(sf*150000);
+					custKey = random.nextInt((int) (sf*150000));
 				} while (custKey%3==0);
 				// set to P as default, will change according to lineItems
 				String orderStatusString = "P";
 				// set to 0.0 as place holder, will change according to lineItems
 				Double totalPrice = 0.0;
-				// endDate - 151 days
-				Date date =  addDays(endDate, -151);
-				long raw = date.getTime();
-				long startRaw = startDate.getTime();
-				int difference = (int) (raw-startRaw);
-				Date orderDate = new Date( startRaw + random.nextInt(difference) );
+				
+				LocalDate orderDate = startDate.plusDays(random.nextInt(dayRange));
+				
 				String priorityString = priorities[random.nextInt(5)];
-				String clerkString = "Clerk#"+String.format("%09d", random.nextInt(sf*1000)+1);
+				String clerkString = "Clerk#"+String.format("%09d", random.nextInt((int) (sf*1000))+1);
 				String shipPriorityString = "0";
 				String oCommentString = RandomStringUtils.randomAlphabetic( random.nextInt(60)+18 );
 				// Insert incomplete orders node
@@ -333,13 +332,21 @@ public class InsertValueTask {
 				int Onumber = 0;
 				for(int j = 0; j < lineItemRows; j++) {
 					Integer L_OrderKey = orderKey;
-					Integer partKey = random.nextInt(sf*200000);
-					int S = sf*10000;
+					Integer partKey = random.nextInt((int) (sf*200000));
+					int S = (int) (sf*10000);
 					int i = random.nextInt(4);
 					Integer suppKey = (partKey+(i*((S/4)+(partKey-1)/S)))%S;
 					Integer lineNum = j; // unique within 7, for simplicity, set to j
 					Integer quantity = random.nextInt(50)+1;
 					Double extendedPrice = quantity * retailPrices[partKey];
+					//ResultSet rs = statement.executeQuery(
+					//		"match(p:part{p_partkey: "+partKey+"})return p.p_retailprice"
+					//		);
+					//Double retail_price = 0.0;
+					//while (rs.next()) {
+					//	retail_price = rs.getObject("p.p_retailprice", Double.class);
+					//}
+					//Double extendedPrice = quantity * retail_price;
 					String extendedPriceString = String.format("%.2f", extendedPrice);
 					Double discount = random.nextInt(11)/100.0;
 					String discountString = String.format("%.2f", discount);
@@ -349,19 +356,22 @@ public class InsertValueTask {
  					String returnFlagString = "N";
 					// set to "F" as default
 					String lineStatusString = "F";
-					Date shipDate = addDays(orderDate, random.nextInt(121)+1);
-					Date commitDate = addDays(orderDate, random.nextInt(61)+30);
-					Date receiptDate = addDays(shipDate, random.nextInt(30)+1);
+					
+					LocalDate shipDate = orderDate.plusDays(random.nextInt(121)+1);
+					LocalDate commitDate = orderDate.plusDays(random.nextInt(61)+30);
+					LocalDate receiptDate = shipDate.plusDays(random.nextInt(30)+1);
+					
 					String shipInstructString = instructs[random.nextInt(4)];
 					String shipModeString = modes[random.nextInt(7)];
 					String lCommentString = RandomStringUtils.randomAlphabetic(random.nextInt(34)+10);
-					if (receiptDate.before(currentDate)) {
+					
+					if (receiptDate.isBefore(currentDate)) {
 						returnFlagString = (random.nextInt(2)==0)?"R":"A";
 					}
-					if (shipDate.after(currentDate)) {
+					if (shipDate.isAfter(currentDate)) {
 						lineStatusString = "O";
 					}
-					if (lineStatusString=="O") {
+					if (lineStatusString.equalsIgnoreCase("O")) {
 						Onumber++;
 					}
 					else {
@@ -382,7 +392,7 @@ public class InsertValueTask {
 							"})\n" + 
 							"create(\n" + 
 							"l:lineitem{\n" + 
-							",l_linenumber: "+lineNum+"\n" + 
+							"l_linenumber: "+lineNum+"\n" + 
 							",l_quantity: "+quantity+"\n" + 
 							",l_extendedprice: "+extendedPriceString+"\n" + 
 							",l_discount: "+discountString+"\n" + 
@@ -395,7 +405,7 @@ public class InsertValueTask {
 							",l_shipinstruct: '"+shipInstructString+"'\n" + 
 							",l_shipmode: '"+shipModeString+"'\n" + 
 							",l_comment: '"+lCommentString+"'\n" + 
-							")\n" + 
+							"})\n" + 
 							"create (l)-[:contain]->(p)\n" + 
 							"create (l)-[:suppliedBy]->(s)\n"+
 							"create (o)-[:include]->(l)");
@@ -417,7 +427,7 @@ public class InsertValueTask {
 						"})\n" + 
 						"set\n" + 
 						"o.o_orderstatus= '"+orderStatusString+"'\n" + 
-						"o.o_totalprice= "+totalPriceString);
+						",o.o_totalprice= "+totalPriceString);
 				//connection.commit();
 				
 			}

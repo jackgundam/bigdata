@@ -52,7 +52,7 @@ public class Q1task extends QueryTask{
 			this.startInstant = Instant.now();
 			
 			statement.execute(queryString);
-			connection.commit();
+			//connection.commit();
 			
 			this.endInstant = Instant.now();
 			System.out.println("Execution time for Q1 is: "+

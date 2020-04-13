@@ -9,7 +9,7 @@ public class initializeMain {
 			Connection connection = DriverManager.getConnection("jdbc:neo4j:bolt://localhost", "neo4j", "12345");
 			System.out.println("got connection: "+connection.toString());
 			
-			InsertValueTask insertValueTask = new InsertValueTask(connection, 1);
+			InsertValueTask insertValueTask = new InsertValueTask(connection, (float)0.05);
 			insertValueTask.InsertValues();
 			
 			connection.close();

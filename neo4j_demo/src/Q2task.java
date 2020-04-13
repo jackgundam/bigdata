@@ -25,47 +25,15 @@ public class Q2task extends QueryTask{
 			String regionString = RegionNames[random.nextInt(5)];
 			Integer sizeInteger = random.nextInt(50)+1;
 			
-			String queryString = "select /*+ USE_SORT_MERGE_JOIN*/\n" + 
-					"s_acctbal,\n" + 
-					"s_name,\n" + 
-					"n_name,\n" + 
-					"p_partkey,\n" + 
-					"p_mfgr,\n" + 
-					"s_address,\n" + 
-					"s_phone,\n" + 
-					"s_comment\n" + 
-					"from\n" + 
-					"part,\n" + 
-					"supplier,\n" + 
-					"partsupp,\n" + 
-					"nation,\n" + 
-					"region\n" + 
-					"where\n" + 
-					"p_partkey = ps_partkey\n" + 
-					"and s_suppkey = ps_suppkey\n" + 
-					"and p_size = "+ sizeInteger +"\n" + 
-					"and p_type like '%"+typeString+"'\n" + 
-					"and s_nationkey = n_nationkey\n" + 
-					"and n_regionkey = r_regionkey\n" + 
-					"and r_name = '"+regionString+"'\n" + 
-					"and ps_supplycost = (\n" + 
-					"select\n" + 
-					"min(ps_supplycost)\n" + 
-					"from\n" + 
-					"partsupp, supplier,\n" + 
-					"nation, region\n" + 
-					"where\n" + 
-					"p_partkey = ps_partkey\n" + 
-					"and s_suppkey = ps_suppkey\n" + 
-					"and s_nationkey = n_nationkey\n" + 
-					"and n_regionkey = r_regionkey\n" + 
-					"and r_name = '"+regionString+"'\n" + 
-					")\n" + 
-					"order by\n" + 
-					"s_acctbal desc,\n" + 
-					"n_name,\n" + 
-					"s_name,\n" + 
-					"p_partkey";
+			String queryString = "match(p:part{p_size:"+sizeInteger+"})-[ps:partsupp]->(s:supplier)"
+					+ "-[:In]->(n:nation)-[:In]->(r:region{r_name:'"+regionString+"'})\n"
+					+ "where p.p_type =~ '.*"+typeString+"'\n"
+					+ "return p.p_partkey, min(toFloat(ps.ps_supplycost)) as minCost,\n"
+					+ "s.s_acctbal,s.s_name,n.n_name,p.p_mfgr,s.s_address,"
+					+ "s.s_phone,s.s_comment\n"
+					+ "order by s.s_acctbal desc,"
+					+ "n.n_name,s.s_name,p.p_partkey\n"
+					+ "limit 100";
 			
 			System.out.println("Query is:");
 			System.out.println();
@@ -76,7 +44,7 @@ public class Q2task extends QueryTask{
 			
 			statement.execute(queryString);
 			
-			connection.commit();
+			//connection.commit();
 			
 			this.endInstant = Instant.now();
 			System.out.println("Execution time for Q2 is: "+

@@ -27,7 +27,8 @@ public class Q3task extends QueryTask{
 			String SegmentString = Segments[random.nextInt(5)];
 			Date queryDate = new Date(baseDate.getTime()+(random.nextInt(dateRange)+1)*86400000);
 			
-			String queryString = "select /*+ USE_SORT_MERGE_JOIN*/\n" + 
+			String queryString = 
+					"select\n" + 
 					"l_orderkey,\n" + 
 					"sum(l_extendedprice*(1-l_discount)) as revenue,\n" + 
 					"o_orderdate,\n" + 
@@ -60,7 +61,7 @@ public class Q3task extends QueryTask{
 			
 			statement.execute(queryString);
 			
-			connection.commit();
+			//connection.commit();
 			
 			this.endInstant = Instant.now();
 			System.out.println("Execution time for Q3 is: "+

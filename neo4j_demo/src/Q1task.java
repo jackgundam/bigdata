@@ -1,13 +1,13 @@
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Random;
 
 public class Q1task extends QueryTask{
 
-	private static final Date baseDate = Date.valueOf("1998-12-01");
+	private static final LocalDate baseDate = LocalDate.parse("1998-12-01");
 	
 	public Q1task(Connection connection) {
 		super(connection);
@@ -20,29 +20,20 @@ public class Q1task extends QueryTask{
 			Statement statement = connection.createStatement();
 			Random random = new Random();
 			int delta = random.nextInt(61)+60;
-			Date queryDate = new Date(baseDate.getTime()-delta*86400000);
+			LocalDate queryDate = baseDate.plusDays(-delta);
 			
-			String queryString = "select\n" + 
-					"l_returnflag,\n" + 
-					"l_linestatus,\n" + 
-					"sum(l_quantity) as sum_qty,\n" + 
-					"sum(l_extendedprice) as sum_base_price,\n" + 
-					"sum(l_extendedprice*(1-l_discount)) as sum_disc_price,\n" + 
-					"sum(l_extendedprice*(1-l_discount)*(1+l_tax)) as sum_charge,\n" + 
-					"avg(l_quantity) as avg_qty,\n" + 
-					"avg(l_extendedprice) as avg_price,\n" + 
-					"avg(l_discount) as avg_disc,\n" + 
-					"count(*) as count_order\n" + 
-					"from\n" + 
-					"lineitem\n" + 
-					"where\n" + 
-					"l_shipdate <= date '"+queryDate+"'\n" + 
-					"group by\n" + 
-					"l_returnflag,\n" + 
-					"l_linestatus\n" + 
-					"order by\n" + 
-					"l_returnflag,\n" + 
-					"l_linestatus";
+			String queryString = "match(l:lineitem)\n"+
+					"where l.l_shipdate<=date('"+queryDate+"')\n"+
+					"return l.l_returnflag as returnflag, l.linestatus as linestatus,"
+					+ " sum(toFloat(l.l_quantity)) as sum_qty,"
+					+ " sum(toFloat(l.l_extendedprice)) as sum_base_price,"
+					+ " sum(toFloat(l.l_extendedprice)*(1-toFloat(l.l_discount))) as sum_disc_price,"
+					+ " sum(toFloat(l.l_extendedprice)*(1-toFloat(l.l_discount))*(1+toFloat(l.l_tax))) as sum_charge,"
+					+ " avg(toFloat(l.l_quantity)) as avg_qty,"
+					+ " avg(toFloat(l.l_extendedprice)) as avg_price,"
+					+ " avg(toFloat(l.l_discount)) as avg_disc,"
+					+ " count(l) as count_order\n"
+					+ "order by returnflag, linestatus";
 			
 			System.out.println("Query is:");
 			System.out.println();
@@ -52,7 +43,7 @@ public class Q1task extends QueryTask{
 			this.startInstant = Instant.now();
 			
 			statement.execute(queryString);
-			connection.commit();
+			//connection.commit();
 			
 			this.endInstant = Instant.now();
 			System.out.println("Execution time for Q1 is: "+

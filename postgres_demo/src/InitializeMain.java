@@ -6,8 +6,7 @@ public class InitializeMain {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try {
-			Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
-			Connection connection = DriverManager.getConnection("jdbc:phoenix:");
+			Connection connection = DriverManager.getConnection("jdbc:postgresql:","postgres","12345");
 			System.out.println("got connection: "+connection.toString());
 			CreateTableTask taskCreateTable = new CreateTableTask(connection);
 			taskCreateTable.CreateTables();

@@ -1,11 +1,13 @@
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import org.apache.phoenix.shaded.org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class InsertValueTask {
 	
@@ -30,7 +32,6 @@ public class InsertValueTask {
 		Collections.shuffle(keys);
 		return keys;
 	}
-	
 	
 	public void InsertSupplier() {
 		try {
@@ -68,12 +69,12 @@ public class InsertValueTask {
 						commentString = "Customer"+RandomStringUtils.randomAlphabetic(20)+"Recommands";
 					}
 				}
-				statement.executeUpdate("UPSERT INTO SUPPLIER VALUES("+key+",'"+
+				statement.executeUpdate("INSERT INTO SUPPLIER VALUES("+key+",'"+
 											"Supplier#r"+formatted_key+"','"+
 												addressString+"',"+nationInteger+",'"+
 												phoneString+"',"+acctbalString+",'"+commentString+"')");
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -138,14 +139,14 @@ public class InsertValueTask {
 				
 				String pCommentString = RandomStringUtils.random(5+random.nextInt(18), true, true);
 				
-				statement.executeUpdate("UPSERT INTO PART VALUES("+key+",'"+nameString+"','"+mfgrString+"','"+brandString+
+				statement.executeUpdate("INSERT INTO PART VALUES("+key+",'"+nameString+"','"+mfgrString+"','"+brandString+
 										"','"+typeString+"',"+sizeString+",'"+containerString+"',"+retailPriceString+",'"+
 										pCommentString+"')");
-				if (i%9000==0) {
-					connection.commit();
-				}
+				//if (i%9000==0) {
+					//connection.commit();
+				//}
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,14 +168,14 @@ public class InsertValueTask {
 					String psSupplyCost = String.format("%.2f", (random.nextInt(99901)+100)/100.0);
 					int length = random.nextInt(150)+49;
 					String psComment = RandomStringUtils.random(length, true, true);
-					statement.executeUpdate("UPSERT INTO PARTSUPP VALUES("+psKey+","+
+					statement.executeUpdate("INSERT INTO PARTSUPP VALUES("+psKey+","+
 											psSuppKey+","+psAvailQTY+","+psSupplyCost+",'"+psComment+"')");
 				}
-				if (idx%2000==0) {
-					connection.commit();
-				}
+				//if (idx%2000==0) {
+					//connection.commit();
+				//}
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -204,14 +205,14 @@ public class InsertValueTask {
 				String mktSegmentString = Segments[random.nextInt(5)];
 				Integer count = random.nextInt(88)+29;
 				String commentString = RandomStringUtils.randomAlphabetic(count);
-				statement.executeUpdate("UPSERT INTO CUSTOMER VALUES("+key+",'"+cNameString+"','"+addressString+"',"+
+				statement.executeUpdate("INSERT INTO CUSTOMER VALUES("+key+",'"+cNameString+"','"+addressString+"',"+
 										nationInteger+",'"+phoneString+"',"+acctbalString+",'"+mktSegmentString+"','"+
 										commentString+"')");
-				if (i%9000==0) {
-					connection.commit();
-				}
+				//if (i%9000==0) {
+					//connection.commit();
+				//}
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -223,7 +224,7 @@ public class InsertValueTask {
 		String[] priorities = { "1-URGENT", "2-HIGH", "3-MEDIUM", "4-NOT SPECIFIED", "5-LOW" };
 		String[] instructs = { "DELIVER IN PERSON", "COLLECT COD", "NONE", "TAKE BACK RETURN" };
 		String[] modes = { "REG AIR", "AIR", "RAIL", "SHIP", "TRUCK", "MAIL", "FOB" };
-
+		
 		LocalDate startDate = LocalDate.parse("1992-01-01");
 		LocalDate currentDate = LocalDate.parse("1995-06-17");
 		LocalDate endDate = LocalDate.parse("1998-12-31");
@@ -285,11 +286,10 @@ public class InsertValueTask {
 					String shipInstructString = instructs[random.nextInt(4)];
 					String shipModeString = modes[random.nextInt(7)];
 					String lCommentString = RandomStringUtils.randomAlphabetic(random.nextInt(34)+10);
-
+					
 					if (receiptDate.isBefore(currentDate)) {
 						returnFlagString = (random.nextInt(2)==0)?"R":"A";
 					}
-
 					if (shipDate.isAfter(currentDate)) {
 						lineStatusString = "O";
 					}
@@ -300,7 +300,7 @@ public class InsertValueTask {
 						Fnumber++;
 					}
 					totalPrice+=extendedPrice*(1+tax)*(1-discount);
-					statement.executeUpdate("UPSERT INTO LINEITEM VALUES("+L_OrderKey+","+partKey+","+suppKey+","+
+					statement.executeUpdate("INSERT INTO LINEITEM VALUES("+L_OrderKey+","+partKey+","+suppKey+","+
 											lineNum+","+quantity+","+extendedPriceString+","+discountString+","+
 											taxString+",'"+returnFlagString+"','"+lineStatusString+"','"+
 											shipDate+"','"+commitDate+"','"+receiptDate+"','"+
@@ -313,10 +313,10 @@ public class InsertValueTask {
 					orderStatusString = "O";
 				}
 				String totalPriceString = String.format("%.2f", totalPrice);
-				statement.executeUpdate("UPSERT INTO ORDERS VALUES("+orderKey+","+custKey+",'"+orderStatusString+"',"+
+				statement.executeUpdate("INSERT INTO ORDERS VALUES("+orderKey+","+custKey+",'"+orderStatusString+"',"+
 										totalPriceString+",'"+orderDate+"','"+priorityString+"','"+clerkString+"',"+
 										shipPriorityString+",'"+oCommentString+"')");
-				connection.commit();
+				//connection.commit();
 				
 			}
 		} catch (Exception e) {
@@ -337,10 +337,10 @@ public class InsertValueTask {
 			Random random = new Random();
 			for (int i = 0; i < nationNamesRegionKeys.length; i++) {
 				String commentString = RandomStringUtils.randomAlphabetic(random.nextInt(84)+31);
-				statement.executeUpdate("UPSERT INTO NATION VALUES("+i+","+
+				statement.executeUpdate("INSERT INTO NATION VALUES("+i+","+
 										nationNamesRegionKeys[i]+",'"+commentString+"')");
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -354,10 +354,10 @@ public class InsertValueTask {
 			Random random = new Random();
 			for (int i = 0; i < RegionNames.length; i++) {
 				String commentString = RandomStringUtils.randomAlphabetic(random.nextInt(85)+31);
-				statement.executeUpdate("UPSERT INTO REGION VALUES("+i+",'"+
+				statement.executeUpdate("INSERT INTO REGION VALUES("+i+",'"+
 										RegionNames[i]+"','"+commentString+"')");
 			}
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -380,7 +380,7 @@ public class InsertValueTask {
 			InsertCustomer();
 			System.out.println("insert into order and lineItem");
 			InsertOrderLineItem();
-			connection.commit();
+			//connection.commit();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
